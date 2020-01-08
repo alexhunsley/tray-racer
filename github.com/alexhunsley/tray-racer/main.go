@@ -18,7 +18,7 @@ var (
 )
 
 func main() {
-	fmt.Println("Hello, Plain")
+	fmt.Println("Hello, Plane")
 
 	createImage()
 }
@@ -45,7 +45,7 @@ func createImage() {
 func Show(name string) {
 	command := "open"
 	arg1 := "-a"
-	arg2 := "/Applications/Preview.app"
+	arg2 := "/System/Applications/Preview.app/Contents/MacOS/Preview"
 	cmd := exec.Command(command, arg1, arg2, name)
 	err := cmd.Run()
 	if err != nil {
