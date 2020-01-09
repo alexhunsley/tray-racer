@@ -35,7 +35,7 @@ func main() {
 		renderWidth:  480,
 		renderHeight: 320,
 		fov:          90,
-		sampleCount:  8,
+		sampleCount:  32,
 	}
 
 	createImage(renderConfig)
@@ -50,9 +50,9 @@ func createImage(renderConfig renderConfig) {
 	halfViewportWidth := renderConfig.renderWidth / 2.0
 	halfViewportHeight := renderConfig.renderHeight / 2.0
 
-	distToViewPort := halfViewportWidth / math.Atan(renderConfig.fov)
+	distToViewPort := halfViewportWidth / math.Atan(math.Pi * renderConfig.fov / 180.0)
 
-	fmt.Println("dist to viewport: ", distToViewPort)
+	fmt.Println("fov, dist to viewport: ", renderConfig.fov, distToViewPort)
 
 	vecFromEyeToTopLeftOfViewport := vec3{x: -halfViewportWidth, y: halfViewportHeight, z: distToViewPort}
 
@@ -82,12 +82,14 @@ func createImage(renderConfig renderConfig) {
 					if planeIntersection.x < 0 {
 						planeIntersection.x -= planeStripeWidth
 					}
-					if int(planeIntersection.x/planeStripeWidth)%2 == 0 {
+					if planeIntersection.z < 0 {
+						planeIntersection.z -= planeStripeWidth
+					}
+
+					if (int(planeIntersection.x/planeStripeWidth) + int(planeIntersection.z/planeStripeWidth)) % 2 == 0 {
 						resultColour = vec3{255.0, 255.0, 255.0}
-						//m.Set(int(x), int(y), white)
 					}
 				}
-				// rolling average
 				aggregateResultColour = aggregateResultColour.add(resultColour.mult(1.0 / renderConfig.sampleCount))
 			}
 			m.Set(int(x), int(y), color.RGBA{uint8(aggregateResultColour.x), uint8(aggregateResultColour.y), uint8(aggregateResultColour.z), 255})
