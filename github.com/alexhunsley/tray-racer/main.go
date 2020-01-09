@@ -54,6 +54,7 @@ func createImage(renderConfig renderConfig) {
 	vecFromEyeToTopLeftOfViewport := vec3{x: -halfViewportWidth, y: halfViewportHeight, z: distToViewPort}
 
 	planeYCoord := -100.0
+	planeStripeWidth := 100.0
 
 	rayStart := vec3{0.0, 0.0, 0.0}
 
@@ -69,7 +70,10 @@ func createImage(renderConfig renderConfig) {
 			if intersectLambda >= 0 {
 				planeIntersection := rayStart.add(rayDirn.mult(intersectLambda))
 
-				if int(planeIntersection.x / 100.0) % 2 == 0 {
+				if planeIntersection.x < 0 {
+					planeIntersection.x -= planeStripeWidth
+				}
+				if int(planeIntersection.x / planeStripeWidth) % 2 == 0 {
 					m.Set(int(x), int(y), white)
 				}
 			}
