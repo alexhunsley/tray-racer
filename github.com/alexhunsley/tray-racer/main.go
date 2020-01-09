@@ -17,21 +17,39 @@ var (
 	blue  color.Color = color.RGBA{0, 0, 255, 255}
 )
 
+type float float64
+
+type renderConfig struct {
+	renderWidth int
+	renderHeight int
+	fov float
+}
+
 func main() {
 	fmt.Println("Hello, Plane")
 
-	createImage()
+	renderConfig := renderConfig{
+		renderWidth:  480,
+		renderHeight: 320,
+		fov:          90,
+	}
+
+	createImage(renderConfig)
 }
 
-func createImage() {
-	m := image.NewRGBA(image.Rect(0, 0, 640, 480)) //*NRGBA (image.Image interface)
+func createImage(renderConfig renderConfig) {
+	m := image.NewRGBA(image.Rect(0, 0, renderConfig.renderWidth, renderConfig.renderHeight)) //*NRGBA (image.Image interface)
 
 	// fill m in blue
 	draw.Draw(m, m.Bounds(), &image.Uniform{blue}, image.ZP, draw.Src)
 
 	// draw a line
-	for i := m.Bounds().Min.X; i < m.Bounds().Max.X; i++ {
-		m.Set(i, m.Bounds().Max.Y/2, white) // to change a single pixel
+	for y := 0; y < renderConfig.renderHeight; y++ {
+		for x := 0; x < renderConfig.renderWidth; x++ {
+			if (x + y) % 10 == 0 || (x - y) % 10 == 0 {
+				m.Set(x, y, white)
+			}
+		}
 	}
 
 	w, _ := os.Create("testImage.png")
