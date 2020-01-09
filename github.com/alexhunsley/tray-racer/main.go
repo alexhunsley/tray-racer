@@ -8,6 +8,7 @@ import (
 	"image/png"
 	"log"
 	"math"
+	"math/rand"
 	"os"
 	"os/exec"
 )
@@ -24,6 +25,7 @@ type renderConfig struct {
 	renderWidth float64
 	renderHeight float64
 	fov float64
+	sampleCount float64
 }
 
 func main() {
@@ -33,6 +35,7 @@ func main() {
 		renderWidth:  480,
 		renderHeight: 320,
 		fov:          90,
+		sampleCount:  8,
 	}
 
 	createImage(renderConfig)
@@ -65,18 +68,29 @@ func createImage(renderConfig renderConfig) {
 			rayDirn = rayDirn.add(vec3{1.0, 0.0, 0.0})
 			//fmt.Println("Made ray: start, dirn = ", rayStart, rayDirn)
 
-			intersectLambda := (planeYCoord - rayStart.y) / rayDirn.y
+			aggregateResultColour := vec3{0.0, 0.0, 0.0}
 
-			if intersectLambda >= 0 {
-				planeIntersection := rayStart.add(rayDirn.mult(intersectLambda))
+			for sampleIndex := 0; sampleIndex < int(renderConfig.sampleCount); sampleIndex++ {
+				resultColour := vec3{0.0, 0.0, 0.0}
+				perturbedRayDirn := rayDirn.add(vec3{rand.Float64(), rand.Float64(), rand.Float64()})
 
-				if planeIntersection.x < 0 {
-					planeIntersection.x -= planeStripeWidth
+				intersectLambda := (planeYCoord - rayStart.y) / perturbedRayDirn.y
+
+				if intersectLambda >= 0 {
+					planeIntersection := rayStart.add(perturbedRayDirn.mult(intersectLambda))
+
+					if planeIntersection.x < 0 {
+						planeIntersection.x -= planeStripeWidth
+					}
+					if int(planeIntersection.x/planeStripeWidth)%2 == 0 {
+						resultColour = vec3{255.0, 255.0, 255.0}
+						//m.Set(int(x), int(y), white)
+					}
 				}
-				if int(planeIntersection.x / planeStripeWidth) % 2 == 0 {
-					m.Set(int(x), int(y), white)
-				}
+				// rolling average
+				aggregateResultColour = aggregateResultColour.add(resultColour.mult(1.0 / renderConfig.sampleCount))
 			}
+			m.Set(int(x), int(y), color.RGBA{uint8(aggregateResultColour.x), uint8(aggregateResultColour.y), uint8(aggregateResultColour.z), 255})
 		}
 		//fmt.Println("============== end row")
 	}
