@@ -7,6 +7,7 @@ import (
 	"image/draw"
 	"image/png"
 	"log"
+	"math"
 	"os"
 	"os/exec"
 )
@@ -20,9 +21,9 @@ var (
 type float float64
 
 type renderConfig struct {
-	renderWidth int
-	renderHeight int
-	fov float
+	renderWidth float64
+	renderHeight float64
+	fov float64
 }
 
 func main() {
@@ -38,18 +39,42 @@ func main() {
 }
 
 func createImage(renderConfig renderConfig) {
-	m := image.NewRGBA(image.Rect(0, 0, renderConfig.renderWidth, renderConfig.renderHeight)) //*NRGBA (image.Image interface)
+	m := image.NewRGBA(image.Rect(0, 0, int(renderConfig.renderWidth), int(renderConfig.renderHeight))) //*NRGBA (image.Image interface)
 
 	// fill m in blue
 	draw.Draw(m, m.Bounds(), &image.Uniform{blue}, image.ZP, draw.Src)
 
+	halfViewportWidth := renderConfig.renderWidth / 2.0
+	halfViewportHeight := renderConfig.renderHeight / 2.0
+
+	distToViewPort := halfViewportWidth / math.Atan(renderConfig.fov)
+
+	fmt.Println("dist to viewport: ", distToViewPort)
+
+	vecFromEyeToTopLeftOfViewport := vec3{x: -halfViewportWidth, y: halfViewportHeight, z: distToViewPort}
+
+	planeYCoord := -100.0
+
+	rayStart := vec3{0.0, 0.0, 0.0}
+
 	// draw a line
-	for y := 0; y < renderConfig.renderHeight; y++ {
-		for x := 0; x < renderConfig.renderWidth; x++ {
-			if (x + y) % 10 == 0 || (x - y) % 10 == 0 {
-				m.Set(x, y, white)
+	for y := 0.0; y < renderConfig.renderHeight; y++ {
+		rayDirn := vecFromEyeToTopLeftOfViewport.add(vec3{0.0, - y, 0})
+		for x := 0.0; x < renderConfig.renderWidth; x++ {
+			rayDirn = rayDirn.add(vec3{1.0, 0.0, 0.0})
+			//fmt.Println("Made ray: start, dirn = ", rayStart, rayDirn)
+
+			intersectLambda := (planeYCoord - rayStart.y) / rayDirn.y
+
+			if intersectLambda >= 0 {
+				planeIntersection := rayStart.add(rayDirn.mult(intersectLambda))
+
+				if int(planeIntersection.x / 100.0) % 2 == 0 {
+					m.Set(int(x), int(y), white)
+				}
 			}
 		}
+		//fmt.Println("============== end row")
 	}
 
 	w, _ := os.Create("testImage.png")
