@@ -29,8 +29,8 @@ func (v vec3) mult(m float64) vec3 {
 	return vec3{m * v.x , m * v.y, m * v.z}
 }
 
-func (v vec3) dot(v2 vec3) vec3 {
-	return vec3{v.x * v2.x , v.y * v2.y, v.z * v2.z}
+func (v vec3) dot(v2 vec3) float64 {
+	return v.x * v2.x + v.y * v2.y + v.z * v2.z
 }
 
 func (v vec3) cross(v2 vec3) vec3 {

@@ -35,7 +35,7 @@ func main() {
 		renderWidth:  480,
 		renderHeight: 320,
 		fov:          80,
-		sampleCount:  32,
+		sampleCount:  16,
 	}
 
 	createImage(renderConfig)
@@ -56,6 +56,7 @@ func createImage(renderConfig renderConfig) {
 
 	vecFromEyeToTopLeftOfViewport := vec3{x: -halfViewportWidth, y: halfViewportHeight, z: distToViewPort}
 
+	plane := plane{orientation: vec3{0.1, 1.0, -0.5}, surfacePoint: vec3{0.0, -100.0, 0.0}}
 
 	planeStripeWidth := 100.0
 
@@ -71,35 +72,27 @@ func createImage(renderConfig renderConfig) {
 			aggregateResultColour := vec3{0.0, 0.0, 0.0}
 
 			for sampleIndex := 0; sampleIndex < int(renderConfig.sampleCount); sampleIndex++ {
-				planeYCoord := -100.0
 
 				resultColour := vec3{0.0, 0.0, 0.0}
 
-				for planeYCoord > -700.0 {
-					perturbedRayDirn := rayDirn.add(vec3{rand.Float64(), rand.Float64(), rand.Float64()})
+				perturbedRayDirn := rayDirn.add(vec3{rand.Float64(), rand.Float64(), rand.Float64()})
 
-					intersectLambda := (planeYCoord - rayStart.y) / perturbedRayDirn.y
+				r := ray{start: vec3{0.0, 0.0, 0.0}, direction: perturbedRayDirn}
+				//intersectLambda := (planeYCoord - rayStart.y) / perturbedRayDirn.y
+				intersectLambda := plane.intersect(r)
 
-					if intersectLambda >= 0 {
-						planeIntersection := rayStart.add(perturbedRayDirn.mult(intersectLambda))
+				if intersectLambda >= 0 {
+					planeIntersection := rayStart.add(perturbedRayDirn.mult(intersectLambda))
 
-						if planeIntersection.x < 0 {
-							planeIntersection.x -= planeStripeWidth
-						}
-						if planeIntersection.z < 0 {
-							planeIntersection.z -= planeStripeWidth
-						}
+					if planeIntersection.x < 0 {
+						planeIntersection.x -= planeStripeWidth
+					}
+					if planeIntersection.z < 0 {
+						planeIntersection.z -= planeStripeWidth
+					}
 
-						if (int(planeIntersection.x/planeStripeWidth)+int(planeIntersection.z/planeStripeWidth))%2 == 0 {
-
-							resultColour = vec3{255.0, 255.0, 255.0}
-							resultColour = resultColour.mult(planeYCoord / -710.0)
-							planeYCoord = -701.0
-						} else {
-							planeYCoord -= 200.0
-						}
-					} else {
-						planeYCoord = -701.0
+					if (int(planeIntersection.x/planeStripeWidth)+int(planeIntersection.z/planeStripeWidth))%2 == 0 {
+						resultColour = vec3{200.0, 200.0, 200.0}
 					}
 				}
 				aggregateResultColour = aggregateResultColour.add(resultColour.mult(1.0 / renderConfig.sampleCount))
