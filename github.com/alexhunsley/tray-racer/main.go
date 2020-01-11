@@ -32,6 +32,10 @@ type renderConfig struct {
 func main() {
 	fmt.Println("Hello, Plane")
 
+	//r := ray{start: vec3{0, 0, 0}, direction: vec3{0, 0, 100}}
+	//dofRays := makeDofRays(r, 4, 50, 1)
+	//fmt.Println("dofRays = ", dofRays)
+
 	renderConfig := renderConfig{
 		renderWidth:  480,
 		renderHeight: 320,
