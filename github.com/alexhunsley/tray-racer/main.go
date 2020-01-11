@@ -25,6 +25,7 @@ type renderConfig struct {
 	renderWidth float64
 	renderHeight float64
 	fov float64
+	focalPlaneDistFromViewport float64
 	sampleCount float64
 }
 
@@ -35,6 +36,7 @@ func main() {
 		renderWidth:  480,
 		renderHeight: 320,
 		fov:          80,
+		focalPlaneDistFromViewport: 300,
 		sampleCount:  16,
 	}
 
@@ -60,7 +62,7 @@ func createImage(renderConfig renderConfig) {
 
 	planeStripeWidth := 100.0
 
-	rayStart := vec3{0.0, 0.0, 0.0}
+	rayStart := vec3{0.0, 0.0, -distToViewPort}
 
 	// draw a line
 	for y := 0.0; y < renderConfig.renderHeight; y++ {
@@ -77,7 +79,7 @@ func createImage(renderConfig renderConfig) {
 
 				perturbedRayDirn := rayDirn.add(vec3{rand.Float64(), rand.Float64(), rand.Float64()})
 
-				r := ray{start: vec3{0.0, 0.0, 0.0}, direction: perturbedRayDirn}
+				r := ray{start: rayStart, direction: perturbedRayDirn}
 				//intersectLambda := (planeYCoord - rayStart.y) / perturbedRayDirn.y
 				intersectLambda := plane.intersect(r)
 
