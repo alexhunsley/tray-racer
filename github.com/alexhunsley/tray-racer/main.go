@@ -45,11 +45,11 @@ func main() {
 	//fmt.Println("lambda = ", lambda, " ix = ", ixPoint)
 
 	renderConfig := renderConfig{
-		renderWidth:  1024,
-		renderHeight: 768,
+		renderWidth:  1280,
+		renderHeight: 1024,
 		fov:          80,
 		focalPlaneDistFromViewport: 300,
-		sampleCount:  128,
+		sampleCount:  32,
 	}
 
 	createImage(renderConfig)
@@ -76,7 +76,7 @@ func createImage(renderConfig renderConfig) {
 	planeStripeWidth := 100.0
 
 	rayStart := vec3{0.0, 0.0, -distToViewPort}
-	bodge := 400
+	//bodge := 400
 
 	// draw a line
 	for y := 0.0; y < renderConfig.renderHeight; y++ {
@@ -90,9 +90,9 @@ func createImage(renderConfig renderConfig) {
 			r := ray{start: rayStart, direction: rayDirn}
 			dofRays := makeDofRays(r, int(renderConfig.sampleCount), 50, 40)
 
-			if int(x) % bodge == 0 && int(y) % bodge == 0 {
-				fmt.Println("ray, dof rays = ", r, dofRays)
-			}
+			//if int(x) % bodge == 0 && int(y) % bodge == 0 {
+			//	fmt.Println("ray, dof rays = ", r, dofRays)
+			//}
 			for _, r := range dofRays {
 
 				resultColour := vec3{0.0, 0.0, 0.0}
@@ -108,9 +108,9 @@ func createImage(renderConfig renderConfig) {
 				if intersectLambda >= 0 {
 					planeIntersection := r.start.add(r.direction.mult(intersectLambda))
 
-					if int(x) % bodge == 0 && int(y) % bodge == 0 {
-						fmt.Println("For ray ", r, " plane ix = ", planeIntersection)
-					}
+					//if int(x) % bodge == 0 && int(y) % bodge == 0 {
+					//	fmt.Println("For ray ", r, " plane ix = ", planeIntersection)
+					//}
 
 					if planeIntersection.x * planeIntersection.x + planeIntersection.z * planeIntersection.z < 1000 {
 						resultColour = vec3{200.0, 0.0, 0.0}
@@ -127,7 +127,7 @@ func createImage(renderConfig renderConfig) {
 						}
 					}
 				}
-				aggregateResultColour = aggregateResultColour.add(resultColour.mult(1.0 / renderConfig.sampleCount))
+				aggregateResultColour = aggregateResultColour.add(resultColour.mult(1.0 / float64(len(dofRays))))
 			}
 			m.Set(int(x), int(y), color.RGBA{uint8(aggregateResultColour.x), uint8(aggregateResultColour.y), uint8(aggregateResultColour.z), 255})
 		}
