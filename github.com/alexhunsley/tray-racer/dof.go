@@ -12,6 +12,14 @@ func makeDofRays(r ray, newRayCount int, focalDistance float64, spread float64) 
 		dofRay := ray{r.start.add(xOffset), r.direction.sub(xOffset)}
 
 		dofRays = append(dofRays, dofRay)
+
+		///
+
+		yOffset := vec3{0, (-0.5 + float64(rayIndex) / float64(newRayCount)) * spread, 0}
+
+		dofRayY := ray{r.start.add(yOffset), r.direction.sub(yOffset)}
+
+		dofRays = append(dofRays, dofRayY)
 	}
 	return dofRays
 }

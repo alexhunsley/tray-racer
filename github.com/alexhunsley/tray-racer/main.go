@@ -8,7 +8,6 @@ import (
 	"image/png"
 	"log"
 	"math"
-	"math/rand"
 	"os"
 	"os/exec"
 )
@@ -35,13 +34,22 @@ func main() {
 	//r := ray{start: vec3{0, 0, 0}, direction: vec3{0, 0, 100}}
 	//dofRays := makeDofRays(r, 4, 50, 1)
 	//fmt.Println("dofRays = ", dofRays)
+	//
+	//fmt.Println("============ Intersect test: ")
+	//p := plane{surfacePoint: vec3{0, 0,0}, orientation: vec3{0, 0,-1 }}
+	//r := ray{start: vec3{1, 2, -1}, direction: vec3{10, 20, 1}}
+	//
+	//lambda := p.intersect(r)
+	//fmt.Println("lambda = ", lambda)
+	//ixPoint := r.coord(lambda)
+	//fmt.Println("lambda = ", lambda, " ix = ", ixPoint)
 
 	renderConfig := renderConfig{
 		renderWidth:  480,
 		renderHeight: 320,
 		fov:          80,
 		focalPlaneDistFromViewport: 300,
-		sampleCount:  16,
+		sampleCount:  32,
 	}
 
 	createImage(renderConfig)
@@ -62,11 +70,13 @@ func createImage(renderConfig renderConfig) {
 
 	vecFromEyeToTopLeftOfViewport := vec3{x: -halfViewportWidth, y: halfViewportHeight, z: distToViewPort}
 
-	plane := plane{orientation: vec3{0.1, 1.0, -0.5}, surfacePoint: vec3{0.0, -100.0, 0.0}}
+	//plane := plane{orientation: vec3{0.1, 1.0, -0.5}, surfacePoint: vec3{0.0, -10.0, 0.0}}
+	plane := plane{orientation: vec3{0.0, 1.0, -0.3}, surfacePoint: vec3{0.0, -100.0, 0.0}}
 
 	planeStripeWidth := 100.0
 
 	rayStart := vec3{0.0, 0.0, -distToViewPort}
+	bodge := 400
 
 	// draw a line
 	for y := 0.0; y < renderConfig.renderHeight; y++ {
@@ -77,28 +87,44 @@ func createImage(renderConfig renderConfig) {
 
 			aggregateResultColour := vec3{0.0, 0.0, 0.0}
 
-			for sampleIndex := 0; sampleIndex < int(renderConfig.sampleCount); sampleIndex++ {
+			r := ray{start: rayStart, direction: rayDirn}
+			dofRays := makeDofRays(r, int(renderConfig.sampleCount), 50, 40)
+
+			if int(x) % bodge == 0 && int(y) % bodge == 0 {
+				fmt.Println("ray, dof rays = ", r, dofRays)
+			}
+			for _, r := range dofRays {
 
 				resultColour := vec3{0.0, 0.0, 0.0}
 
-				perturbedRayDirn := rayDirn.add(vec3{rand.Float64(), rand.Float64(), rand.Float64()})
+				//perturbedRayDirn := rayDirn.add(vec3{rand.Float64(), rand.Float64(), rand.Float64()})
+				//perturbedRayDirn := rayDirn
 
-				r := ray{start: rayStart, direction: perturbedRayDirn}
+				//r := ray{start: rayStart, direction: perturbedRayDirn}
 				//intersectLambda := (planeYCoord - rayStart.y) / perturbedRayDirn.y
+
 				intersectLambda := plane.intersect(r)
 
 				if intersectLambda >= 0 {
-					planeIntersection := rayStart.add(perturbedRayDirn.mult(intersectLambda))
+					planeIntersection := r.start.add(r.direction.mult(intersectLambda))
 
-					if planeIntersection.x < 0 {
-						planeIntersection.x -= planeStripeWidth
-					}
-					if planeIntersection.z < 0 {
-						planeIntersection.z -= planeStripeWidth
+					if int(x) % bodge == 0 && int(y) % bodge == 0 {
+						fmt.Println("For ray ", r, " plane ix = ", planeIntersection)
 					}
 
-					if (int(planeIntersection.x/planeStripeWidth)+int(planeIntersection.z/planeStripeWidth))%2 == 0 {
-						resultColour = vec3{200.0, 200.0, 200.0}
+					if planeIntersection.x * planeIntersection.x + planeIntersection.z * planeIntersection.z < 1000 {
+						resultColour = vec3{200.0, 0.0, 0.0}
+					} else {
+						if planeIntersection.x < 0 {
+							planeIntersection.x -= planeStripeWidth
+						}
+						if planeIntersection.z < 0 {
+							planeIntersection.z -= planeStripeWidth
+						}
+
+						if (int(planeIntersection.x/planeStripeWidth)+int(planeIntersection.z/planeStripeWidth))%2 == 0 {
+							resultColour = vec3{200.0, 200.0, 200.0}
+						}
 					}
 				}
 				aggregateResultColour = aggregateResultColour.add(resultColour.mult(1.0 / renderConfig.sampleCount))
