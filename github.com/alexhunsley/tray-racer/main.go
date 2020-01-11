@@ -45,11 +45,11 @@ func main() {
 	//fmt.Println("lambda = ", lambda, " ix = ", ixPoint)
 
 	renderConfig := renderConfig{
-		renderWidth:  480,
-		renderHeight: 320,
+		renderWidth:  1024,
+		renderHeight: 768,
 		fov:          80,
 		focalPlaneDistFromViewport: 300,
-		sampleCount:  32,
+		sampleCount:  128,
 	}
 
 	createImage(renderConfig)
