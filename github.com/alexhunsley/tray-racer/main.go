@@ -88,7 +88,7 @@ func createImage(renderConfig renderConfig) {
 			aggregateResultColour := vec3{0.0, 0.0, 0.0}
 
 			r := ray{start: rayStart, direction: rayDirn}
-			dofRays := makeDofRays(r, int(renderConfig.sampleCount), 50, 40)
+			dofRays := makeDofRays(r, int(renderConfig.sampleCount), 50, 20)
 
 			//if int(x) % bodge == 0 && int(y) % bodge == 0 {
 			//	fmt.Println("ray, dof rays = ", r, dofRays)
