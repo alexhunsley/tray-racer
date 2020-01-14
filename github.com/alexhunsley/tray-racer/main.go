@@ -106,7 +106,7 @@ func createImage(renderConfig renderConfig) {
 				intersectLambda := plane.intersect(r)
 
 				if intersectLambda >= 0 {
-					planeIntersection := r.start.add(r.direction.mult(intersectLambda))
+					planeIntersection := r.coord(intersectLambda)
 
 					//if int(x) % bodge == 0 && int(y) % bodge == 0 {
 					//	fmt.Println("For ray ", r, " plane ix = ", planeIntersection)
