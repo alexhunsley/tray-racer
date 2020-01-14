@@ -3,7 +3,7 @@ package main
 // returns a list of rays based on the given ray,
 // spread out horizontally. The resulting rays have slightly different start points and directions,
 // such that they all converge at r.start + r.direction.
-func makeDofRays(r ray, newRayCount int, 	focalDistance float64, spread float64) []ray {
+func makeDofRays(r ray, newRayCount int, focalDistance float64, spread float64) []ray {
 	dofRays := []ray{}
 
 	for rayIndex := 0; rayIndex < newRayCount; rayIndex += 1 {
