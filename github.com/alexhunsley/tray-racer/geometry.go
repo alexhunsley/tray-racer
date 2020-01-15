@@ -21,6 +21,10 @@ type rayOffsetBundle struct {
 	weightToRayOffsetMap map[float64][]vec3
 }
 
+func MakeRayOffsetBundle() rayOffsetBundle {
+	return rayOffsetBundle{make(map[float64][]vec3)}
+}
+
 func (r ray) coord(lambda float64) vec3 {
 	return r.start.add(r.direction.mult(lambda))
 }

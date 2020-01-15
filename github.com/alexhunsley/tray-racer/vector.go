@@ -8,6 +8,16 @@ type vec3 struct {
 	z float64
 }
 
+var (
+	zeroVec vec3 = vec3{0.0, 0.0, 0.0}
+	xUnitVec vec3 = vec3{1.0, 0.0, 0.0}
+	yUnitVec vec3 = vec3{0.0, 1.0, 0.0}
+	zUnitVec vec3 = vec3{0.0, 0.0, 1.0}
+	xUnitVecNegative vec3 = vec3{-1.0, 0.0, 0.0}
+	yUnitVecNegative vec3 = vec3{0.0, -1.0, 0.0}
+	zUnitVecNegative vec3 = vec3{0.0, 0.0, -1.0}
+)
+
 func (v vec3) size() float64 {
 	return math.Sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
 }

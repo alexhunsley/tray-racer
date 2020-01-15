@@ -45,8 +45,8 @@ func main() {
 	//fmt.Println("lambda = ", lambda, " ix = ", ixPoint)
 
 	renderConfig := renderConfig{
-		renderWidth:  1280,
-		renderHeight: 1024,
+		renderWidth:  128,
+		renderHeight: 102,
 		fov:          80,
 		focalPlaneDistFromViewport: 300,
 		sampleCount:  32,
@@ -57,6 +57,9 @@ func main() {
 
 func createImage(renderConfig renderConfig) {
 	m := image.NewRGBA(image.Rect(0, 0, int(renderConfig.renderWidth), int(renderConfig.renderHeight))) //*NRGBA (image.Image interface)
+
+	rayOffsets := MakeRayOffsetsForDof(1.0)
+	fmt.Println("Made ray weights: ", rayOffsets)
 
 	// fill m in blue
 	draw.Draw(m, m.Bounds(), &image.Uniform{blue}, image.ZP, draw.Src)
@@ -138,7 +141,7 @@ func createImage(renderConfig renderConfig) {
 	defer w.Close()
 	png.Encode(w, m) //Encode writes the Image m to w in PNG format.
 
-	Show(w.Name())
+	//Show(w.Name())
 }
 
 // show a specified file by Preview.app for OS X(darwin)
