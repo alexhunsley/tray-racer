@@ -31,3 +31,17 @@ func makeDofRays(r ray, newRayCount int, focalDistance float64, spread float64) 
 	}
 	return dofRays
 }
+
+func MakeRayOffsetBundle(spread float64) rayOffsetBundle {
+	// how many points we divide each circle into. the first item
+	// is always 0 since it's a zero radius circle (i.e. the original ray)
+	pointsInCircles := []int{0, 8, 12}
+
+	circleRelativeWeights := []int{4, 2, 1}
+
+	totalWeight := 0
+	for i, circRelWeight := range circleRelativeWeights {
+		totalWeight += circRelWeight * pointsInCircles[i]
+	}
+	singleWeight := 1.0 /
+}
