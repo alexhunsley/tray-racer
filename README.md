@@ -2,13 +2,19 @@
 
 Tray Racer is a toy classical ray tracer written in Go.
 
+It is a WIP.
+
+Notes on the design and maths are in a separate repo:
+https://github.com/alexhunsley/tray-racer-notes
+
 ## Aims
 
-1. Build up from the simplest possible Ray Tracer by gradually adding features (see 'Part X' commits in git history)
+1. Build up from the simplest possible Ray Tracer by gradually adding features - this aspect will happen as part of a re-work once there is enough of a raytracer there.
 
 The idea here is for the project to have some educational benefit - anyone interested in classical raytracing can more clearly what addition of various features involves.
 
 2. Utilise Golang's concurrency features to allow simple divison of work between cores
 
-3. At later stages: experiment with speed optimisation features (so we favour faster runtime at possible expense of greater memory usage)
+3. At later stages: experiment with speed optimisation features (in this project I want to favour faster execution at possible expense of greater memory usage)
 
+4. Have fun
