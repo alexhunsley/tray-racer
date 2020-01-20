@@ -14,10 +14,14 @@ func (p plane) intersect(r ray) (bool, float64) {
 	topDot := planeSurfaceToRayStart.dot(p.orientation)
 	bottomDot := r.direction.dot(p.orientation)
 
+	// avoid division by 0 when ray is parallel to plane. This means there are 0 or infinite solutions;
+	// we regard this as 'no hit'
 	if bottomDot == 0.0 {
 		return false, 0.0
 	}
 	lambda := topDot / bottomDot
+
+	// intersections behind the line's start point+direction don't count
 	if lambda <= 0.0 {
 		return false, 0.0
 	}

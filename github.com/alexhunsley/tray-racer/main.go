@@ -154,5 +154,5 @@ func createImage(renderConfig renderConfig) {
 	defer w.Close()
 	png.Encode(w, m) //Encode writes the Image m to w in PNG format.
 
-	Show(w.Name())
+	//Show(w.Name())
 }
