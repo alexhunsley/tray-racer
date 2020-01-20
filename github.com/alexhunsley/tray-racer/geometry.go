@@ -7,6 +7,11 @@ type ray struct {
 	direction vec3
 }
 
+type intersectable interface {
+	// returns lambda for the given ray and the object
+	intersect(r ray) (bool, float64)
+}
+
 // a collection of rays, each with a relative weight.
 // the weight is the weight for *each* the rays in the corresponding value.
 // for example:

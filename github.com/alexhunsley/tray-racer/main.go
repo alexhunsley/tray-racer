@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/draw"
 	"image/png"
 	"math"
 	"os"
@@ -45,9 +44,11 @@ func main() {
 	renderConfig := renderConfig{
 		renderWidth:  1024,
 		renderHeight: 768,
+		//renderWidth:  10,
+		//renderHeight: 10,
 		fov:          80,
 		focalPlaneDistFromViewport: 300,
-		sampleCount:  16,
+		sampleCount:  1,
 	}
 
 	createImage(renderConfig)
@@ -55,12 +56,6 @@ func main() {
 
 func createImage(renderConfig renderConfig) {
 	m := image.NewRGBA(image.Rect(0, 0, int(renderConfig.renderWidth), int(renderConfig.renderHeight))) //*NRGBA (image.Image interface)
-
-	rayOffsets := MakeRayOffsetsForDof(1.0)
-	fmt.Println("Made ray weights: ", rayOffsets)
-
-	// fill m in blue
-	draw.Draw(m, m.Bounds(), &image.Uniform{blue}, image.ZP, draw.Src)
 
 	halfViewportWidth := renderConfig.renderWidth / 2.0
 	halfViewportHeight := renderConfig.renderHeight / 2.0
@@ -72,12 +67,16 @@ func createImage(renderConfig renderConfig) {
 	vecFromEyeToTopLeftOfViewport := vec3{x: -halfViewportWidth, y: halfViewportHeight, z: distToViewPort}
 
 	//plane := plane{orientation: vec3{0.1, 1.0, -0.5}, surfacePoint: vec3{0.0, -10.0, 0.0}}
-	plane := plane{orientation: vec3{0.0, 1.0, -0.3}, surfacePoint: vec3{0.0, -100.0, 0.0}}
 
 	planeStripeWidth := 100.0
 
 	rayStart := vec3{0.0, 0.0, -distToViewPort}
 	//bodge := 400
+
+	objects := []intersectable{}
+
+	objects = append(objects, plane{orientation: vec3{0.0, 1.0, -0.3}, surfacePoint: vec3{0.0, -100.0, 0.0}})
+	objects = append(objects, plane{orientation: vec3{1.0, -0.3, 0.0}, surfacePoint: vec3{200.0, 0.0, 0.0}})
 
 	for y := 0.0; y < renderConfig.renderHeight; y++ {
 		rayDirn := vecFromEyeToTopLeftOfViewport.add(vec3{0.0, - y, 0})
@@ -88,7 +87,10 @@ func createImage(renderConfig renderConfig) {
 			aggregateResultColour := vec3{0.0, 0.0, 0.0}
 
 			r := ray{start: rayStart, direction: rayDirn}
-			dofRays := makeDofRays(r, int(renderConfig.sampleCount), 50, 20)
+
+			// TODO make an interface for ray bundle producers
+			//dofRays := makeDofRays(r, int(renderConfig.sampleCount), 50, 20)
+			dofRays := []ray{r}
 
 			for _, r := range dofRays {
 
@@ -100,26 +102,42 @@ func createImage(renderConfig renderConfig) {
 				//r := ray{start: rayStart, direction: perturbedRayDirn}
 				//intersectLambda := (planeYCoord - rayStart.y) / perturbedRayDirn.y
 
-				intersectLambda := plane.intersect(r)
+				//intersectLambdas := []float64{}
 
-				if intersectLambda >= 0 {
-					planeIntersection := r.coord(intersectLambda)
+				closestObjectHitLambda := 0.0
+				var closestObjectHit intersectable = nil
+
+				for _, object := range objects {
+
+					didHit, intersectionLambda := object.intersect(r)
+					//intersectLambdas = append(intersectLambdas, object.intersect(r))
+
+					//fmt.Println("didHit, lambda = ", didHit, intersectionLambda)
+					if didHit && (closestObjectHit == nil || intersectionLambda < closestObjectHitLambda) {
+						closestObjectHit = object
+						closestObjectHitLambda = intersectionLambda
+						intersectionLambda = closestObjectHitLambda
+					}
+				}
+				if closestObjectHit != nil {
+					objectIntersection := r.coord(closestObjectHitLambda)
 
 					//if int(x) % bodge == 0 && int(y) % bodge == 0 {
-					//	fmt.Println("For ray ", r, " plane ix = ", planeIntersection)
+					//	fmt.Println("For ray ", r, " plane ix = ", objectIntersection)
 					//}
 
-					if planeIntersection.x * planeIntersection.x + planeIntersection.z * planeIntersection.z < 1000 {
+					// TODO this detail finding should be in the object too
+					if objectIntersection.x * objectIntersection.x + objectIntersection.z * objectIntersection.z < 1000 {
 						resultColour = vec3{200.0, 0.0, 0.0}
 					} else {
-						if planeIntersection.x < 0 {
-							planeIntersection.x -= planeStripeWidth
+						if objectIntersection.x < 0 {
+							objectIntersection.x -= planeStripeWidth
 						}
-						if planeIntersection.z < 0 {
-							planeIntersection.z -= planeStripeWidth
+						if objectIntersection.z < 0 {
+							objectIntersection.z -= planeStripeWidth
 						}
 
-						if (int(planeIntersection.x/planeStripeWidth)+int(planeIntersection.z/planeStripeWidth))%2 == 0 {
+						if (int(objectIntersection.x/planeStripeWidth)+int(objectIntersection.z/planeStripeWidth))%2 == 0 {
 							resultColour = vec3{200.0, 200.0, 200.0}
 						}
 					}
