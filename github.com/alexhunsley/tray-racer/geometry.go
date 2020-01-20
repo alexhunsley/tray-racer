@@ -7,9 +7,18 @@ type ray struct {
 	direction vec3
 }
 
-type intersectable interface {
+type primitive interface {
 	// returns lambda for the given ray and the object
 	intersect(r ray) (bool, float64)
+}
+
+type material struct {
+	colour vec3
+}
+
+type sceneobject struct {
+	primitive primitive
+	material material
 }
 
 // a collection of rays, each with a relative weight.

@@ -73,10 +73,10 @@ func createImage(renderConfig renderConfig) {
 	rayStart := vec3{0.0, 0.0, -distToViewPort}
 	//bodge := 400
 
-	objects := []intersectable{}
+	plane1 := sceneobject{plane{orientation: vec3{0.0, 1.0, -0.3}, surfacePoint: vec3{0.0, -100.0, 0.0}}, material{vec3{40.0, 255.0, 0.0}}}
+	plane2 := sceneobject{plane{orientation: vec3{1.0, -0.4, 0.0}, surfacePoint: vec3{250.0, 0.0, 0.0}}, material{vec3{255.0, 255.0, 0.0}}}
 
-	objects = append(objects, plane{orientation: vec3{0.0, 1.0, -0.3}, surfacePoint: vec3{0.0, -100.0, 0.0}})
-	objects = append(objects, plane{orientation: vec3{1.0, -0.3, 0.0}, surfacePoint: vec3{200.0, 0.0, 0.0}})
+	objects := []sceneobject{plane1, plane2}
 
 	for y := 0.0; y < renderConfig.renderHeight; y++ {
 		rayDirn := vecFromEyeToTopLeftOfViewport.add(vec3{0.0, - y, 0})
@@ -105,21 +105,21 @@ func createImage(renderConfig renderConfig) {
 				//intersectLambdas := []float64{}
 
 				closestObjectHitLambda := 0.0
-				var closestObjectHit intersectable = nil
+				var closestObjectHit sceneobject
 
 				for _, object := range objects {
 
-					didHit, intersectionLambda := object.intersect(r)
+					didHit, intersectionLambda := object.primitive.intersect(r)
 					//intersectLambdas = append(intersectLambdas, object.intersect(r))
 
 					//fmt.Println("didHit, lambda = ", didHit, intersectionLambda)
-					if didHit && (closestObjectHit == nil || intersectionLambda < closestObjectHitLambda) {
+					if didHit && (closestObjectHit.primitive == nil || intersectionLambda < closestObjectHitLambda) {
 						closestObjectHit = object
 						closestObjectHitLambda = intersectionLambda
 						intersectionLambda = closestObjectHitLambda
 					}
 				}
-				if closestObjectHit != nil {
+				if closestObjectHit.primitive != nil {
 					objectIntersection := r.coord(closestObjectHitLambda)
 
 					//if int(x) % bodge == 0 && int(y) % bodge == 0 {
@@ -128,6 +128,7 @@ func createImage(renderConfig renderConfig) {
 
 					// TODO this detail finding should be in the object too
 					if objectIntersection.x * objectIntersection.x + objectIntersection.z * objectIntersection.z < 1000 {
+						// red dot so we can see origin
 						resultColour = vec3{200.0, 0.0, 0.0}
 					} else {
 						if objectIntersection.x < 0 {
@@ -138,7 +139,7 @@ func createImage(renderConfig renderConfig) {
 						}
 
 						if (int(objectIntersection.x/planeStripeWidth)+int(objectIntersection.z/planeStripeWidth))%2 == 0 {
-							resultColour = vec3{200.0, 200.0, 200.0}
+							resultColour = closestObjectHit.material.colour
 						}
 					}
 				}
