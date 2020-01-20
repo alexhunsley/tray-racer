@@ -6,10 +6,8 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
-	"log"
 	"math"
 	"os"
-	"os/exec"
 )
 
 var (
@@ -45,11 +43,11 @@ func main() {
 	//fmt.Println("lambda = ", lambda, " ix = ", ixPoint)
 
 	renderConfig := renderConfig{
-		renderWidth:  128,
-		renderHeight: 102,
+		renderWidth:  1024,
+		renderHeight: 768,
 		fov:          80,
 		focalPlaneDistFromViewport: 300,
-		sampleCount:  32,
+		sampleCount:  16,
 	}
 
 	createImage(renderConfig)
@@ -81,7 +79,6 @@ func createImage(renderConfig renderConfig) {
 	rayStart := vec3{0.0, 0.0, -distToViewPort}
 	//bodge := 400
 
-	// draw a line
 	for y := 0.0; y < renderConfig.renderHeight; y++ {
 		rayDirn := vecFromEyeToTopLeftOfViewport.add(vec3{0.0, - y, 0})
 		for x := 0.0; x < renderConfig.renderWidth; x++ {
@@ -93,9 +90,6 @@ func createImage(renderConfig renderConfig) {
 			r := ray{start: rayStart, direction: rayDirn}
 			dofRays := makeDofRays(r, int(renderConfig.sampleCount), 50, 20)
 
-			//if int(x) % bodge == 0 && int(y) % bodge == 0 {
-			//	fmt.Println("ray, dof rays = ", r, dofRays)
-			//}
 			for _, r := range dofRays {
 
 				resultColour := vec3{0.0, 0.0, 0.0}
@@ -141,22 +135,5 @@ func createImage(renderConfig renderConfig) {
 	defer w.Close()
 	png.Encode(w, m) //Encode writes the Image m to w in PNG format.
 
-	//Show(w.Name())
-}
-
-// show a specified file by Preview.app for OS X(darwin)
-func Show(name string) {
-	previewCommandPath := "/System/Applications/Preview.app/Contents/MacOS/Preview"
-
-	if _, err := os.Stat(previewCommandPath); os.IsNotExist(err) {
-		previewCommandPath = "/Applications/Preview.app/Contents/MacOS/Preview"
-	}
-	command := "open"
-	arg1 := "-a"
-	//arg2 :=
-	cmd := exec.Command(command, arg1, previewCommandPath, name)
-	err := cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
+	Show(w.Name())
 }
