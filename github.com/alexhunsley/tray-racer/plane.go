@@ -8,7 +8,7 @@ type plane struct {
 }
 
 // returns hit true/false and lambda for any intersection
-func (p plane) intersect(r ray) (bool, float64) {
+func (p plane) intersect(r ray) (didHit bool, lambda float64) {
 	planeSurfaceToRayStart := p.surfacePoint.sub(r.start)
 
 	topDot := planeSurfaceToRayStart.dot(p.orientation)
@@ -19,11 +19,10 @@ func (p plane) intersect(r ray) (bool, float64) {
 	if bottomDot == 0.0 {
 		return false, 0.0
 	}
-	lambda := topDot / bottomDot
-
+	lambdaForHit := topDot / bottomDot
+	if lambdaForHit <= 0.0 {
 	// intersections behind the line's start point+direction don't count
-	if lambda <= 0.0 {
 		return false, 0.0
 	}
-	return true, lambda
+	return true, lambdaForHit
 }

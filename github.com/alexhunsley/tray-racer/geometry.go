@@ -9,7 +9,7 @@ type ray struct {
 
 type primitive interface {
 	// returns lambda for the given ray and the object
-	intersect(r ray) (bool, float64)
+	intersect(r ray) (didHit bool, lambda float64)
 }
 
 type material struct {
